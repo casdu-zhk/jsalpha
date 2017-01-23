@@ -3,24 +3,10 @@
 
 # fetch.py
 
-from __future__ import print_function
-from yahoo_finance import Share
 import tushare as ts
 import pandas as pd
+from WindPy import w
 import os
-
-def fetch_from_yahoo(csv_dir, symbols, start_date, end_date):
-    cols = ['Open', 'High', 'Low', 'Close', 'Volume', 'Adj Close']
-    for s in symbols:
-        stock = Share(s)
-        data = stock.get_historical(start_date, end_date)
-        df = pd.DataFrame(data)
-        df = df.rename(columns={'Adj_Close': 'Adj Close'})
-        df = df.drop('Symbol', 1)
-        df = df.set_index('Date')
-        df = df[cols]
-        print("Saving " + s + ".csv")
-        df.to_csv(csv_dir + s + '.csv')
 
 def fetch_from_tushare(csv_dir, symbols, start_date, end_date):
     cols = ['open', 'high', 'low', 'close', 'volume', 'Adj Close']
@@ -31,6 +17,27 @@ def fetch_from_tushare(csv_dir, symbols, start_date, end_date):
         print("Saving " + s + ".csv")
         df.to_csv(csv_dir + s + ".csv")
 
-if __name__ == '__main__':
-    # fetch_from_yahoo("../csv/", ['AAPL'], '2015-01-01', '2015-08-31')
-    fetch_from_tushare("../csv/", ["hs300"], '2015-01-01', '2015-08-31')
+def fetch_from_wind(csv_dir, symbols, start_date, end_date):
+    w.start()
+    cols = ["open", "high", "low", "close", "amt"]
+    for s in symbols:
+        filename = "%s%s.csv"%(csv_dir, s)
+        # if os.path.exists(filename):
+            # continue
+        raw_data = w.wsd(s, cols, beginTime=start_date, endTime=end_date)
+        dic = {}
+        for data, field in zip(raw_data.Data, raw_data.Fields):
+            if str.lower(str(field)) == "amt":
+                field = "volume"
+            dic[str.lower(str(field))] = data
+        df = pd.DataFrame(dic)
+        df["Adj close"] = df["close"]
+        df["date"] = pd.to_datetime(raw_data.Times)
+        df["date"] = df["date"].map(lambda x: x.strftime('%Y-%m-%d'))
+        df = df[["date", "open", "high", "low", "close", "volume", "Adj close"]]
+        assert(df.shape[0] != 0)
+        df.to_csv(filename, index=False)
+
+# if __name__ == '__main__':
+    # fetch_from_wind("../csv/", ["000300.SH"], '2005-01-01', '2017-01-20')
+    # fetch_from_tushare("../csv/", ["hs300"], '2015-01-01', '2015-08-31')

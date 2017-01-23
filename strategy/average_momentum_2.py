@@ -13,11 +13,11 @@ from data import HistoricCSVDataHandler
 from event import OrderEvent
 from portfolio import Portfolio
 from strategy import Strategy
-from fetch import fetch_from_tushare
+from fetch import fetch_from_wind
 
 class Average_Momentum(Strategy):
 
-    def __init__(self, bars, events, look_back=12):
+    def __init__(self, bars, events, look_back=30):
         self.bars = bars
         self.symbol_list = self.bars.symbol_list
         self.events = events
@@ -51,10 +51,10 @@ class Average_Momentum(Strategy):
 
 if __name__ == "__main__":
     csv_dir = '../csv/'
-    start_date = '2015-01-01'
+    start_date = '2005-01-01'
     end_date = '2017-01-20'
-    symbol_list = ['hs300']
-    # fetch_from_tushare(csv_dir, symbol_list, start_date, end_date)
+    symbol_list = ['000300.SH']
+    fetch_from_wind(csv_dir, symbol_list, start_date, end_date)
     initial_capital = 100000.0
     start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
     heartbeat = 0.0

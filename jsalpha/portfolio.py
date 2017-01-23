@@ -230,7 +230,7 @@ class Portfolio(object):
                 capital = self.current_holdings['cash']
                 assert(cur_quantity == 0)
                 assert(event.quantity == 0)
-                event.quantity = int(capital / current_price)
+                event.quantity = (capital / current_price)
                 event.direction = "BUY"
             elif event.direction == "ALLSELL":
                 current_price = self.bars.get_latest_bar_value(event.symbol, 'close')

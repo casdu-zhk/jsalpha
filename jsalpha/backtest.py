@@ -122,7 +122,7 @@ class Backtest(object):
         """
         Simulates the backtest and outputs portfolio performance.
         """
-        print("Date\t\tOrder\tPrice\tQuantity\tCost")
+        # print("Date\t\tOrder\tPrice\tQuantity\tCost")
         self._run_backtest()
         self._output_performance()
         if plot:
