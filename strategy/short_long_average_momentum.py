@@ -17,7 +17,7 @@ from fetch import fetch_from_wind
 
 class Average_Momentum(Strategy):
 
-    def __init__(self, bars, events, short_window=20, long_window=100):
+    def __init__(self, bars, events, short_window=10, long_window=60):
         self.bars = bars
         self.symbol_list = self.bars.symbol_list
         self.events = events
@@ -44,7 +44,16 @@ class Average_Momentum(Strategy):
                 bars = pd.Series(bars)
                 past_return_short = bars.pct_change().mean()
 
-                if self.bought[symbol] == "OUT" and past_return_short > past_return_long:
+                bars = self.bars.get_latest_bars_values(symbol, "volume", self.long_window)
+                bars = pd.Series(bars)
+                if bars.shape[0] < self.long_window:
+                    continue
+                past_volume_long = bars.pct_change().mean()
+                bars = self.bars.get_latest_bars_values(symbol, "volume", self.short_window)
+                bars = pd.Series(bars)
+                past_volume_short = bars.pct_change().mean()
+
+                if self.bought[symbol] == "OUT" and past_return_short > past_return_long and past_volume_short > past_volume_long:
                     order = OrderEvent(symbol, "ALLBUY")
                     self.events.put(order)
                     self.bought[symbol] = "LONG"
